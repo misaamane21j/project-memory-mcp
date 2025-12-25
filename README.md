@@ -27,7 +27,7 @@ All operations are performed by Claude using its Read, Write, Edit, and Bash too
 Install globally from GitHub:
 
 ```bash
-npm install -g git+https://github.com/annatran/project-memory-mcp.git
+npm install -g git+https://github.com/misaamane21j/project-memory-mcp.git
 ```
 
 ## Setup
@@ -325,13 +325,13 @@ MIT
 
 - [Spec](./spec.md) - Detailed specification
 - [MCP Documentation](https://modelcontextprotocol.io/)
-- [GitHub Repository](https://github.com/annatran/project-memory-mcp)
+- [GitHub Repository](https://github.com/misaamane21j/project-memory-mcp)
 
 ## Support
 
 For issues, questions, or feedback:
 
-- [GitHub Issues](https://github.com/annatran/project-memory-mcp/issues)
+- [GitHub Issues](https://github.com/misaamane21j/project-memory-mcp/issues)
 
 ---
 
