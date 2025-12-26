@@ -40,6 +40,16 @@ Detect and record:
 - **Framework**: React, Next.js, Django, FastAPI, etc.
 - **Conventions**: Code style, testing framework, file naming patterns
 - **Commands**: npm scripts, make targets, build/test commands
+- **Project Scope & Complexity**:
+  - Count total lines of code (rough estimate from file count and structure)
+  - Estimate task volume: small (<20 tasks), medium (20-100 tasks), large (>100 tasks)
+  - Complexity indicators: multi-module/monorepo, external APIs, complex state, deployment stages
+  - Check for existing task/work tracking patterns (JIRA, Trello, task files, TODO lists)
+
+**CRITICAL: Check for existing task system:**
+- Look for: \`.github/tasks/\`, \`tasks/\`, \`work-items.json\`, \`.tasks/\`, existing \`.project-memory/tasks/\`
+- Examine file naming patterns, folder structure, JSON schema if they exist
+- Record the pattern to use for consistency
 
 ---
 
@@ -56,34 +66,47 @@ Include sections:
 
 ### .project-memory/prompts/parse-tasks.md
 Workflow steps:
-1. Read spec from .project-memory/specs/ or user message
-2. Extract tasks (ID, title, description, criteria, dependencies, priority, subtasks)
-3. Check existing tasks to avoid duplicate IDs
-4. Show parsed tasks to user via AskUserQuestion
-5. Update tasks-active.json after approval with specReference field
+1. Detect task storage structure (single-file vs. multi-file based on tasks-index.json presence)
+2. Read spec from .project-memory/specs/ or user message
+3. Extract tasks (ID, title, description, criteria, dependencies, priority, subtasks)
+4. For multi-file projects, assign tasks to appropriate domains
+5. Check existing tasks to avoid duplicate IDs (check all relevant domain files if multi-file)
+6. Show parsed tasks to user via AskUserQuestion (with target file(s))
+7. After approval, update tasks-active.json or tasks-active_{domain}.json files
+8. If multi-file, update tasks-index.json with new task counts and domains
 
 ### .project-memory/prompts/review.md
 Workflow steps:
-1. Ask user for review scope via AskUserQuestion:
+1. Detect task storage structure (single-file vs. multi-file based on tasks-index.json presence)
+2. Ask user for review scope via AskUserQuestion:
    - "Review recent uncommitted changes" (git diff)
    - "Review entire codebase" (full code against architecture/standards)
    - "Review specific file/directory" (focused review of selected area)
-2. Based on user choice:
+3. Based on user choice:
    - Recent changes: Get git diff (unstaged and staged)
    - Full codebase: Read architecture, conventions, key files
    - Specific area: Ask for path, review that section
-3. Read context (tasks, architecture, specs)
-4. Analyze changes/code for quality, bugs, security, architecture alignment, task progress
-5. Propose updates via AskUserQuestion (task status, architecture changes, issues)
-6. Apply approved changes
+4. Read context:
+   - Tasks: Check single-file (tasks-active.json) or multi-file (relevant tasks-active_{domain}.json)
+   - architecture.md, conventions.md, specs/
+5. Analyze changes/code for quality, bugs, security, architecture alignment, task progress
+6. Propose updates via AskUserQuestion (task status, architecture changes, issues)
+7. Apply approved changes (update appropriate task files based on detected structure)
 
 ### .project-memory/prompts/sync.md
 Workflow steps:
-1. Get commit history (last 20 commits)
-2. Read current state (tasks, commit-log, architecture)
-3. Determine task completions (match commits to task IDs, check criteria)
-4. Propose updates via AskUserQuestion (move completed tasks, update commit-log, architecture, commands)
-5. Apply approved changes
+1. Detect task storage structure (single-file vs. multi-file based on tasks-index.json presence)
+2. Get commit history (last 20 commits)
+3. Read current state:
+   - Tasks: Single-file (tasks-active.json, tasks-completed.json) or multi-file (all tasks-active/completed_{domain}.json)
+   - commit-log.md, architecture.md, conventions.md
+4. Determine task completions (match commits to task IDs, check criteria)
+5. Propose updates via AskUserQuestion:
+   - Move completed tasks to appropriate completed file(s)
+   - Update commit-log.md (keep last 20 commits)
+   - Update architecture.md if structure changed
+   - Add new commands to useful-commands.md
+6. Apply approved changes (update files based on detected task structure)
 
 ---
 
@@ -104,8 +127,40 @@ Keep each file ≤ 200 lines. If multi-language project detected, create .projec
 
 Create with content from Step 2 analysis:
 
-### tasks-active.json & tasks-completed.json
-\`{"tasks": []}\`
+### Task Files Structure (Choose Based on Project Scope)
+
+**If existing task pattern found:**
+- Use the same pattern/naming convention from Step 2 analysis
+- Maintain consistency with existing project structure
+
+**If no existing pattern, choose based on project scope:**
+
+#### Small/Medium Projects (<100 tasks):
+Use single files (original pattern):
+- \`.project-memory/tasks/tasks-active.json\` - \`{"tasks": []}\`
+- \`.project-memory/tasks/tasks-completed.json\` - \`{"tasks": []}\`
+
+#### Large Projects (>100 tasks or complex multi-module):
+Use modular structure with domain-specific files:
+- \`.project-memory/tasks/tasks-active_{domain}.json\` (e.g., auth, api, ui, database)
+- \`.project-memory/tasks/tasks-completed_{domain}.json\`
+- \`.project-memory/tasks/tasks-index.json\` - Maps domains and summary stats
+
+Example structure for large project:
+\`\`\`
+.project-memory/tasks/
+├── tasks-index.json                    # Domain registry & stats
+├── tasks-active_auth.json              # Auth domain tasks
+├── tasks-completed_auth.json
+├── tasks-active_api.json               # API domain tasks
+├── tasks-completed_api.json
+├── tasks-active_ui.json                # UI domain tasks
+├── tasks-completed_ui.json
+├── tasks-active_database.json          # Database domain tasks
+└── tasks-completed_database.json
+\`\`\`
+
+**Domains suggested:** Infer from project structure (modules, packages, features)
 
 ### architecture.md
 Populate with:
