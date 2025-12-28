@@ -7,34 +7,58 @@ import { TASK_JSON_SCHEMA } from '../schemas/task-schema.js';
  */
 export const INIT_PROMPT = `
 # Project Memory Initialization
-
 Initialize: create folder structure, analyze project, generate customized prompts, populate memory files.
 
-**CRITICAL: All generated prompts ≤ 200 lines. Get user approval before writing files.**
+**CRITICAL: All prompts ≤ 200 lines. Get user approval before writing files.**
+---
+
+## Step 0: Safety Check
+
+Check: \`test -d .project-memory && echo "EXISTS" || echo "NOT_FOUND"\`
+
+If EXISTS:
+- Warn: "⚠️ .project-memory/ exists! Reinitializing will overwrite all files."
+- Create Backup: \`cp -r .project-memory .project-memory.backup-$(date +%Y%m%d-%H%M%S)\`
+- Ask via AskUserQuestion: "Backup created. Proceed with reinitialization?"
+- If declined → STOP, suggest sync/organize tools instead
+- If approved → Delete existing .project-memory, then continue to Step 1
 
 ---
 
-## Step 1: Create Folder Structure
+## Step 1: Create Folders
 
-Create directories:
-- \`.project-memory/tasks/\` - Task JSON files
-- \`.project-memory/specs/\` - Spec markdown files
-- \`.project-memory/prompts/\` - Prompt templates: base.md, parse-tasks.md, review.md, sync.md
-- \`.project-memory/\` root: architecture.md, conventions.md, useful-commands.md, commit-log.md
+\`.project-memory/\`: tasks/, specs/, prompts/ (base.md, parse-tasks.md, review.md, sync.md), architecture.md, conventions.md, useful-commands.md, commit-log.md
 
 ---
 
-## Step 2: Analyze Project
+## Step 2: Analyze Codebase & Validate Docs
 
-Detect and record:
-- **Tech**: Language(s), framework, code style, testing/build/lint patterns
-- **Scope**: Task volume estimate (small <20, medium 20-100, large >100)
-- **Complexity**: Multi-module? External APIs? Deployment stages?
-- **Existing task patterns**: Look for .github/tasks/, tasks/, work-items.json, .tasks/ - record naming/structure for reuse
+**CRITICAL: Use actual code implementation as source of truth, NOT documentation.**
+
+**REQUIRED ACTIONS:**
+1. Read: package.json OR requirements.txt OR go.mod OR Cargo.toml
+2. Scan: src/, lib/, components/, tests/ scripts/ app/ directories
+3. Find: .eslintrc, .prettierrc, tsconfig.json, or similar config files
+4. Check for existing tasks: .github/tasks/, tasks/, .tasks/, task.json, work-items.json
+5. Read: CLAUDE.md, README.md, docs/, specs/ if they exist
+
+**OUTPUT REQUIRED - Show user:**
+- Tech stack detected: [list]
+- Project structure: [list]
+- Conventions found: [list]
+- Commands found: [list]
+- Scripts/tools found: [list]
+- Existing task patterns: [list or "none"]
+- Docs vs code discrepancies: [list or "none"]
+
+**If discrepancies between documentation and code implemenation found:**
+Ask via AskUserQuestion: "Found X discrepancies. Use current code as source of truth?"
+
+**CHECKPOINT: Get user approval before proceeding to Step 4**
 
 ---
 
-## Step 3: Create Prompt Templates
+## Step 4: Create Prompt Templates
 
 **Use the fallback templates provided at the end of this prompt** as starting content.
 
@@ -45,6 +69,7 @@ Write these 4 files to \`.project-memory/prompts/\`:
    - Project Memory file structure (list paths)
    - Task Schema: ${TASK_JSON_SCHEMA}
    - Rules (approval, 200-line limit, JSON format, timestamps)
+   - Documentation Rules: **CRITICAL: Do NOT create massive .md files.** Prefer code documentation (docstrings, comments) for implementation details. Use markdown files ONLY for essential architecture, setup, and usage guides. Keep each .md file ≤100 lines.
    - Task Completion Criteria: **CRITICAL: Always mark task as COMPLETED only when:** (1) Implementation is verified to work (code exists and functions as intended), (2) Tests pass (unit tests, integration tests, or manual verification completed), (3) No blocking issues remain
    - Security Rules: **NEVER** commit .env, hardcode credentials, log secrets, write API keys in tests. **ALWAYS** use environment variables, keep .env in .gitignore, define ports in .env (never hardcode), check port conflicts before deployment
 
@@ -54,34 +79,39 @@ Write these 4 files to \`.project-memory/prompts/\`:
 
 4. **sync.md** - Use the "Template for sync.md" provided below
 
-**Note:** The templates are complete, working prompts. Write them as-is to the files (you'll customize them in Step 4).
+**Note:** The templates are complete, working prompts. Write them as-is to the files (you'll customize them in Step 5).
 
 ---
 
-## Step 4: Customize Prompts
+## Step 5: Customize Prompts
+
+**Use code-based analysis from Step 2, NOT documentation.**
+
 Add project-specific details to each file:
-- Language guidelines (TypeScript types/ESLint, Python PEP 8, Go gofmt, etc.)
-- Framework patterns (React hooks, Django apps, etc.)
-- Testing approach and patterns
-- Build/deploy/CI commands
+- Language guidelines (TypeScript types/ESLint, Python PEP 8, Go gofmt, etc.) - from actual code
+- Framework patterns (React hooks, Django apps, etc.) - from actual imports
+- Testing approach and patterns - from actual test files
+- Build/deploy/CI commands - from actual config files
 - Security/performance review checklists
-- For code review prompt: ask user if any specific files/directories that need special attention or adding further context to the review scope. 
 - For parse-tasks prompt: incorporate any existing task file naming/structure patterns detected in Step 2
 
-**example for additions to review prompt:** 
-The current nodule is a microservice that is part of larger system. Pay special attention to API contracts and inter-service communication patterns.
+**MANDATORY QUESTION - Ask user via AskUserQuestion:**
+"For code review customization, are there specific files/directories that need special attention? (e.g., API contracts, microservice boundaries, security modules, infrastructure code)"
 
-**example for additions to parse-tasks prompt:**
-The project uses a domain-based task structure with files named tasks-active_{domain}.json. Domains include auth, api, ui, database, infra.
+[Wait for response, then incorporate answer into review.md]
 
-**example for additions to sync prompt:**
-During sync, pay special attention to any changes in deployment scripts or infrastructure-as-code files.
+**Examples for customization:**
+- Review prompt: "Pay special attention to API contracts and inter-service communication patterns."
+- Parse-tasks prompt: "Project uses domain-based task structure: tasks-active_{domain}.json (auth, api, ui, database, infra)."
+- Sync prompt: "Pay special attention to changes in deployment scripts or infrastructure-as-code files."
 
 Keep each ≤ 200 lines. For multi-language projects, create .project-memory/prompts/languages/ with language-specific extensions.
 
 ---
 
-## Step 5: Create Project Memory Files
+## Step 6: Create Project Memory Files
+
+**IMPORTANT: Base ALL content on ACTUAL code analysis from Step 2, NOT documentation.**
 
 **Task File Structure** (choose based on Step 2 scope):
 - **Existing pattern found**: Use same naming/structure
@@ -89,30 +119,35 @@ Keep each ≤ 200 lines. For multi-language projects, create .project-memory/pro
 - **Large** (>100 tasks or multi-module): Multi-file with tasks-active_{domain}.json, tasks-completed_{domain}.json, tasks-index.json (domain registry + task counts)
 - **Domain examples**: auth, api, ui, database, infra - infer from project structure
 
-**architecture.md**: Language & framework, project structure, key components, dependencies, architectural patterns
+**architecture.md**: Language & framework (from code), project structure (from actual dirs), key components (from code), dependencies (from package files), architectural patterns (from code organization)
 
-**conventions.md**: File naming patterns, code style/formatter/linter, testing framework, import/module patterns, documentation style
+**conventions.md**: File naming patterns (from actual files), code style/formatter/linter (from actual code + configs), testing framework (from test files), import/module patterns (from code), documentation style (if present)
 
-**useful-commands.md**: Dev commands, build commands, test commands, lint/format commands, detected commands from package.json or make targets
+**useful-commands.md**: Dev commands, build commands, test commands, lint/format commands - extracted from package.json, Makefile, scripts/, CI configs (NOT from README)
 
 **commit-log.md**: \`# Commit Log (Last 20 Commits)\\n\\n(Will be populated during first sync)\`
 
+Checkpoint: Ensure these files are current code implementation-based, NOT documentation-based.
 ---
 
-## Step 6: Check for Existing CLAUDE.md
+## Step 7: Check for Existing CLAUDE.md
 
-If CLAUDE.md exists and >50 lines:
-1. Analyze for Architecture/Conventions/Commands/Tasks/Specs sections
-2. Ask via AskUserQuestion: "Organize into project-memory now?"
-3. If yes: run \`project-memory organize\` tool, then continue to Step 7
-4. If no: proceed directly to Step 7
+**STOP: Do not proceed to Step 8 until you complete this check.**
+
+1. Check if CLAUDE.md exists: \`test -f CLAUDE.md && wc -l CLAUDE.md\`
+2. If exists AND >50 lines:
+   - Analyze for: Architecture/Conventions/Commands/Tasks/Specs sections
+   - **REQUIRED:** Ask via AskUserQuestion: "Found CLAUDE.md with [X] lines. Organize into project-memory now?"
+   - If yes → run \`project-memory organize\` tool, then continue to Step 8
+   - If no → proceed to Step 8
+3. If doesn't exist OR ≤50 lines → proceed to Step 8
 
 ---
 
-## Step 7: Update or Create CLAUDE.md
+## Step 8: Update or Create CLAUDE.md
 
-If CLAUDE.md doesn't exist, create it with this content.
-If CLAUDE.md exists, add this reference section to it:
+If CLAUDE.md doesn't exist, create it with this content at the top section
+If CLAUDE.md exists, add this reference section to the top of CLAUDE.md:
 
 \`\`\`markdown
 ## Project Memory System
@@ -124,6 +159,7 @@ This project uses \`.project-memory/\` for AI-managed task and context tracking.
 - .project-memory/architecture.md - System design
 - .project-memory/conventions.md - Coding standards
 - .project-memory/prompts/base.md - Full instructions
+- .project-memory/useful-commands.md - Dev/build/test commands and scripts
 
 **Use proactively:** Ask to parse tasks (new specs), review (before commits), sync (after commits)
 \`\`\`

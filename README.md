@@ -40,6 +40,7 @@ Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_
 {
   "mcpServers": {
     "project-memory": {
+      "type": "stdio",
       "command": "project-memory-mcp"
     }
   }
@@ -48,17 +49,19 @@ Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_
 
 ### Configure MCP in Claude Code CLI
 
-Add to your MCP settings (`~/.config/claude/mcp_settings.json`):
+Add to your user config at `~/.claude.json`:
 
 ```json
 {
   "mcpServers": {
     "project-memory": {
+      "type": "stdio",
       "command": "project-memory-mcp"
     }
   }
 }
 ```
+This will make the mcp available in all your project.
 
 ### Restart Claude
 

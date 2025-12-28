@@ -11,6 +11,7 @@ import { ORGANIZE_PROMPT } from './prompts/organize-prompt.js';
 import { PARSE_TASKS_PROMPT } from './prompts/parse-tasks-prompt.js';
 import { REVIEW_PROMPT } from './prompts/review-prompt.js';
 import { SYNC_PROMPT } from './prompts/sync-prompt.js';
+import { CREATE_SPEC_PROMPT } from './prompts/create-spec-prompt.js';
 import { composePrompt, getProjectRoot } from './utils/prompt-loader.js';
 
 /**
@@ -83,6 +84,15 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           properties: {},
         },
       },
+      {
+        name: 'create-spec',
+        description:
+          'Create detailed specification from user requirements or file content. Initializes/syncs project memory, clarifies ambiguity, validates against codebase, considers security/edge cases/tests, and writes spec to .project-memory/specs/. Asks for larger context and flags inconsistencies.',
+        inputSchema: {
+          type: 'object',
+          properties: {},
+        },
+      },
     ],
   };
 });
@@ -134,6 +144,11 @@ ${SYNC_PROMPT}
       case 'organize':
         // Organize/migrate existing CLAUDE.md into project-memory
         prompt = ORGANIZE_PROMPT;
+        break;
+
+      case 'create-spec':
+        // Create spec from user requirements or file content
+        prompt = CREATE_SPEC_PROMPT;
         break;
 
       default:
