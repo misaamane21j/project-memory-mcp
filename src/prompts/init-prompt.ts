@@ -150,18 +150,44 @@ If CLAUDE.md doesn't exist, create it with this content at the top section
 If CLAUDE.md exists, add this reference section to the top of CLAUDE.md:
 
 \`\`\`markdown
-## Project Memory System
+## Project Memory System - CRITICAL
 
 This project uses \`.project-memory/\` for AI-managed task and context tracking.
 
-**Check at session start:**
-- .project-memory/tasks/tasks-active.json (or tasks-active_{domain}.json if multi-file) - Current work
-- .project-memory/architecture.md - System design
-- .project-memory/conventions.md - Coding standards
-- .project-memory/prompts/base.md - Full instructions
-- .project-memory/useful-commands.md - Dev/build/test commands and scripts
+**REQUIRED AT EVERY SESSION START - DO NOT SKIP:**
 
-**Use proactively:** Ask to parse tasks (new specs), review (before commits), sync (after commits)
+Before working on ANY task, you MUST read these files in order:
+
+1. \`.project-memory/tasks/tasks-active.json\` (or \`tasks-active_{domain}.json\` if multi-file)
+   - **Why:** Know what work is in progress and what's pending
+   - **Read:** ALL active tasks before starting any work
+
+2. \`.project-memory/architecture.md\`
+   - **Why:** Understand system design and component interactions
+   - **Read:** Before making architectural decisions
+
+3. \`.project-memory/conventions.md\`
+   - **Why:** Follow existing code patterns and standards
+   - **Read:** Before writing any code
+
+4. \`.project-memory/useful-commands.md\`
+   - **Why:** Use correct commands for dev/build/test/deploy
+   - **Read:** Before running any commands
+
+5. \`.project-memory/prompts/base.md\`
+   - **Why:** Full workflow instructions and rules
+   - **Read:** For task management, review, and sync guidelines
+
+**Failure to read these files will result in:**
+- Duplicate work (tasks already in progress)
+- Incorrect implementations (violating architecture/conventions)
+- Build/test failures (using wrong commands)
+
+**Use proactively:**
+- \`project-memory parse-tasks\` - Parse tasks from new specs
+- \`project-memory review\` - Before commits
+- \`project-memory sync\` - After commits
+- \`project-memory create-spec\` - Create specifications from requirements
 \`\`\`
 
 ---
@@ -171,7 +197,7 @@ This project uses \`.project-memory/\` for AI-managed task and context tracking.
 1. Show summary: folders created, prompts generated, memory files initialized, CLAUDE.md changes
 2. Get user final approval
 3. Write all approved files
-4. Confirm success and explain next steps (parse-tasks, review, sync workflows)
+4. Confirm success and explain next steps (organise, parse-tasks, review, sync workflows)
 
 Done!
 `.trim();

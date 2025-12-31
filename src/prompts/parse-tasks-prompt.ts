@@ -38,14 +38,41 @@ If task structure is not found, assess project size/spec complexity to choose st
 4. Include: title, description, acceptance criteria, dependencies, priority, subtasks if needed
 5. Set specReference field to the spec file path
 
-### Step 3: Check for Duplicates
+### Step 3: Check Existing Tasks & Codebase
 
-**For single-file structure:**
-- Check existing tasks in .project-memory/tasks/tasks-active.json
+**CRITICAL: Avoid duplicates and already-implemented tasks**
 
-**For multi-file structure:**
-- Check all relevant \`tasks-active_{domain}.json\` files to avoid duplicate IDs
-- Update tasks-index.json to register new domains if needed
+**Check existing tasks (both active AND completed):**
+
+For single-file structure:
+- Read tasks-active.json AND tasks-completed.json
+- Compare new tasks against both files
+
+For multi-file structure:
+- Read ALL \`tasks-active_{domain}.json\` AND \`tasks-completed_{domain}.json\`
+- Compare new tasks against all files
+
+**Check codebase for already-implemented features:**
+- For each parsed task, verify if it's already implemented in code
+- Read relevant source files to confirm implementation status
+- Check: Does the feature exist? Does it work as described?
+
+**OUTPUT REQUIRED - Show validation results:**
+\`\`\`
+📋 Task Validation:
+✅ NEW: TASK-001 - [title] (not in tasks, not in code)
+⚠️ DUPLICATE: TASK-002 - [title] (already in tasks-active.json)
+⚠️ IMPLEMENTED: TASK-003 - [title] (already in code at src/...)
+❌ FALSE COMPLETE: TASK-004 - [title] (in completed tasks but NOT in code!)
+\`\`\`
+
+**Actions based on validation:**
+- **NEW** → Add to active tasks
+- **DUPLICATE** → Skip (already tracked)
+- **IMPLEMENTED** → Add directly to completed tasks (not active)
+- **FALSE COMPLETE** → Flag to user: "Task marked complete but not implemented. Re-add to active?"
+
+**CRITICAL: Always verify against codebase, not just task status**
 
 ### Step 4: Show Parsed Tasks to User
 

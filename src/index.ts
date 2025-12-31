@@ -12,6 +12,7 @@ import { PARSE_TASKS_PROMPT } from './prompts/parse-tasks-prompt.js';
 import { REVIEW_PROMPT } from './prompts/review-prompt.js';
 import { SYNC_PROMPT } from './prompts/sync-prompt.js';
 import { CREATE_SPEC_PROMPT } from './prompts/create-spec-prompt.js';
+import { REFRESH_PROMPTS_PROMPT } from './prompts/refresh-prompts-prompt.js';
 import { composePrompt, getProjectRoot } from './utils/prompt-loader.js';
 
 /**
@@ -93,6 +94,15 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           properties: {},
         },
       },
+      {
+        name: 'refresh-prompts',
+        description:
+          'Refresh project-specific prompts with latest template improvements while preserving customizations. Backs up existing prompts, compares with new templates, identifies customizations, and merges them into updated templates. Requires user approval before modifications.',
+        inputSchema: {
+          type: 'object',
+          properties: {},
+        },
+      },
     ],
   };
 });
@@ -149,6 +159,11 @@ ${SYNC_PROMPT}
       case 'create-spec':
         // Create spec from user requirements or file content
         prompt = CREATE_SPEC_PROMPT;
+        break;
+
+      case 'refresh-prompts':
+        // Refresh prompts with new templates while preserving customizations
+        prompt = REFRESH_PROMPTS_PROMPT;
         break;
 
       default:

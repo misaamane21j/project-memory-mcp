@@ -8,6 +8,12 @@ export const REVIEW_PROMPT = `# Code Review
 
 You are helping review code changes.
 
+**IMPORTANT: Use extended thinking for this review.**
+- Think carefully and thoroughly before providing feedback
+- Analyze each file/change methodically
+- Consider edge cases, security implications, and architectural impact
+- Do not rush - a thorough review catches issues early
+
 ## Review Scope
 
 Before proceeding, ask the user what they want to review:
@@ -34,37 +40,62 @@ Check if tasks-index.json exists:
 ## Instructions (based on chosen scope)
 
 ### For Recent Changes:
-1. Get git diff using Bash: \`git diff\` and \`git diff --cached\`
-2. Read current context:
-   - Tasks: Single-file (tasks-active.json) or multi-file (all tasks-active_{domain}.json)
+1. Get git diff: \`git diff\` and \`git diff --cached\`
+2. Read context:
+   - Tasks: tasks-active.json (or tasks-active_{domain}.json if multi-file)
    - .project-memory/architecture.md
    - .project-memory/specs/*.md (if relevant)
-3. Analyze changes for:
-   - Code quality issues
-   - Potential bugs or security issues
-   - **Security violations**: hardcoded credentials/secrets, .env committed, API keys in code/tests, hardcoded ports
-   - Alignment with architecture
-   - Task progress
+3. **OUTPUT REQUIRED - Change Context:**
+   \`\`\`
+   📝 Change Summary:
+   - Files modified: [list]
+   - Purpose: [what problem does this solve / what feature does it add]
+   - Benefit: [why is this change valuable]
+   - Related task: [TASK-XXX if applicable]
+   \`\`\`
+4. **Assess codebase relevancy:**
+   - Does change align with architecture? [yes/no + explanation]
+   - Does change follow conventions? [yes/no + explanation]
+   - Impact on existing code: [none/low/medium/high + areas affected]
+5. Analyze for issues:
+   - Code quality, bugs, security violations
+   - **Security**: hardcoded secrets, .env committed, API keys in code
+   - Task progress alignment
 
 ### For Entire Codebase:
-1. Read codebase structure from .project-memory/architecture.md
-2. Review key files and components against:
-   - .project-memory/conventions.md (coding standards)
-   - .project-memory/architecture.md (design compliance)
-   - Tasks: Single-file (tasks-active.json) or multi-file (relevant tasks-active_{domain}.json)
-3. Analyze for:
+1. Read: architecture.md, conventions.md, tasks-active.json
+2. Scan codebase: src/, lib/, tests/, config files
+3. **OUTPUT REQUIRED - Codebase Overview:**
+   \`\`\`
+   🏗️ Implementation Overview:
+
+   Architecture:
+   - Pattern: [e.g., MVC, microservices, monolith]
+   - Key components: [list main modules/services]
+   - Data flow: [how data moves through system]
+
+   Tech Stack:
+   - Language: [with version]
+   - Framework: [if any]
+   - Key dependencies: [major libraries]
+
+   Code Health:
+   - Test coverage: [high/medium/low/none]
+   - Documentation: [inline/external/missing]
+   - Technical debt: [areas needing attention]
+   \`\`\`
+4. Analyze for:
    - Architectural consistency
-   - Adherence to conventions
-   - **Security violations**: hardcoded credentials/secrets, .env in git, API keys in code/tests, hardcoded ports, port conflicts
-   - Technical debt
-   - Unfinished tasks implementation
+   - Convention adherence
+   - **Security violations**: secrets, .env in git, API keys, port conflicts
+   - Unfinished task implementations
 
 ### For Specific Area:
-1. Ask user to specify file/directory path
-2. Read relevant files in that area
-3. Compare against conventions and architecture
-4. **Check for security violations** in the specified area
-5. Check if files are part of any active tasks
+1. Ask user for file/directory path
+2. Read files, compare against conventions/architecture
+3. **Provide context:** What this area does, how it fits in the system
+4. Check for security violations
+5. Check if part of active tasks
 
 ## Final Step
 

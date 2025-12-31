@@ -58,18 +58,18 @@ export async function composePrompt(
     return fallbackPrompt;
   }
 
-  // Compose available prompts
+  // Compose available prompts (no wrapper headers, just clean concatenation)
   const parts: string[] = [];
 
   if (base) {
-    parts.push('# Base Instructions\n\n' + base);
+    parts.push(base);
   }
 
   if (specific) {
-    parts.push('\n\n# Specific Instructions\n\n' + specific);
+    parts.push(specific);
   }
 
-  return parts.join('');
+  return parts.join('\n\n---\n\n');
 }
 
 /**

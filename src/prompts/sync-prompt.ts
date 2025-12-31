@@ -16,7 +16,7 @@ ${TASK_JSON_SCHEMA}
 
 Check if tasks-index.json exists:
 - **Single-file**: Use tasks-active.json and tasks-completed.json
-- **Multi-file**: Use tasks-active_{domain}.json and tasks-completed_{domain}.json
+- **Multi-file**: Use {task sequence}-{tasks status active / pending }_{domain}.json files
 
 ## Instructions
 
@@ -34,10 +34,19 @@ Check if tasks-index.json exists:
 
 4. Validate consistency between documentation in project-memory, Claude.md and codebase:
 
-   **Check CLAUDE.md:**
-   - Verify references in CLAUDE.md match current codebase structure
-   - Identify outdated instructions, file paths, or architectural references
-   - If inconsistencies found → ask user for approval to update CLAUDE.md
+   **Check CLAUDE.md - CRITICAL:**
+   - **NEVER leave outdated references in CLAUDE.md**
+   - CLAUDE.md MUST always reflect current code implementation
+   - Verify: file paths, function names, architectural references, commands
+   - Check for: renamed files, deleted modules, changed APIs, deprecated patterns
+   - **OUTPUT REQUIRED - Show all inconsistencies found:**
+     \`\`\`
+     ⚠️ CLAUDE.md Inconsistencies:
+     - Line X: References [old path] but file is now at [new path]
+     - Line Y: Describes [old pattern] but code now uses [new pattern]
+     - Line Z: Command [old cmd] no longer works, should be [new cmd]
+     \`\`\`
+   - If ANY inconsistencies found → **MUST update CLAUDE.md** (ask user approval first)
 
    **Check Task System:**
    - Compare active tasks against actual codebase implementation
@@ -68,7 +77,8 @@ Check if tasks-index.json exists:
    - **Task updates:**
      * Update task statuses (completed / pending / outdated)
      * Move completed tasks to appropriate completed file(s)
-     * Update tasks-index.json if multi-file (adjust task counts)
+     * Update tasks-index.json if multi-file (adjust task counts). 
+     * In multi-file task system, rename file with the following convention {seq}.{status}.{domain}.json depending on status
    - **Project memory updates:**
      * Update commit-log.md (keep last 20 commits)
      * Update architecture.md if structure changed (keep concise, ≤200 lines)
@@ -77,7 +87,15 @@ Check if tasks-index.json exists:
 
 7. After approval, apply changes using Write/Edit tools (respecting task file structure)
 
-**CRITICAL DOCUMENTATION RULE:**
+**CRITICAL RULES:**
+
+**CLAUDE.md must NEVER be outdated:**
+- Sync MUST fix all outdated references in CLAUDE.md
+- If code changed → CLAUDE.md MUST be updated to match
+- Outdated documentation is worse than no documentation
+- Every sync should verify CLAUDE.md accuracy
+
+**Documentation conciseness:**
 - Keep all .md files concise (≤100 lines)
 - Implementation details belong in code docstrings/comments, NOT markdown
 - Only update markdown for essential architecture/setup changes

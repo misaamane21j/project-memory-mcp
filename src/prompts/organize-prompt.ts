@@ -47,13 +47,14 @@ If not initialized, run \`project-memory init\` first, then return.
 - Content to DISCARD: [fails validation]
 
 **MANDATORY QUESTION - Ask via AskUserQuestion:**
-"Found X tasks and Y specs in CLAUDE.md. How should we organize them?
+"Found X tasks and Y specs and CLAUDE.md is over X lines. How should we organize them?
 1. Migrate all tasks to .project-memory/tasks/
 2. Migrate all specs to .project-memory/specs/
 3. Migrate only validated tasks/specs (discard outdated)
 4. Skip task/spec migration (organize architecture/conventions/commands only)"
 
-**CHECKPOINT: Get user approval on what to migrate vs discard**
+**CHECKPOINT: Get user approval on what to migrate vs discard** 
+**AWLAYS: offer to migrate specs / task if found**
 
 ---
 
