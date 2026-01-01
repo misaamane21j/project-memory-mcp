@@ -82,7 +82,7 @@ Claude will:
 2. Analyze your project (language, frameworks, structure, conventions)
 3. Generate and customize project-specific prompts (base.md, parse-tasks.md, review.md, sync.md)
 4. Populate initial documentation files (architecture.md, conventions.md, useful-commands.md) with detected project info
-5. Add minimal IMPORTANT reference to `claude.md`
+5. Add session-start checklist to CLAUDE.md (ensures project memory is loaded every session)
 
 **Important:** Each prompt file is limited to ≤ 200 lines to prevent context bloat.
 
@@ -154,14 +154,42 @@ Claude will:
 
 **Result:** CLAUDE.md stays clean with just references, detailed content lives in organized files.
 
+### Create Spec from Requirements
+
+When you have a feature idea or requirements, ask Claude:
+
+```
+"Create a spec for user authentication"
+```
+
+Claude will:
+1. Clarify ambiguous requirements
+2. Validate against existing codebase
+3. Consider security, edge cases, and testing
+4. Write spec to `.project-memory/specs/`
+
+### Refresh Prompts
+
+When prompt templates have been updated, ask Claude:
+
+```
+"Refresh project memory prompts"
+```
+
+Claude will:
+1. Backup existing prompts
+2. Compare with new templates
+3. Preserve your customizations
+4. Merge improvements into updated prompts
+
 ### Proactive Prompting
 
-After initialization, Claude will automatically prompt you:
+After initialization, Claude will automatically:
 
-- **When you provide a spec:** "Would you like me to parse tasks?"
-- **Before commits:** "Would you like me to review your changes?"
-- **After commits:** "Would you like me to sync project memory?"
-- **Session start:** Check for pending reviews/syncs
+- **Session start:** Read project memory files (tasks, architecture, conventions) before working
+- **When you provide a spec:** Offer to parse tasks
+- **Before commits:** Offer to review changes
+- **After commits:** Offer to sync project memory
 
 ## Project Structure
 
@@ -217,22 +245,28 @@ Tasks follow this structure:
 
 ## MCP Tools
 
-The server exposes 5 tools (all return prompts only):
+The server exposes 7 tools (all return prompts only):
 
 ### `init`
 Initialize project memory system. Run once per project.
 
 ### `parse-tasks`
-Parse tasks from spec files or implementation plans.
+Parse tasks from spec files or implementation plans. Checks existing tasks AND codebase to avoid duplicates.
 
 ### `review`
-Review uncommitted code changes against project context.
+Review uncommitted code changes against project context. Uses extended thinking for thorough analysis.
 
 ### `sync`
-Sync project memory with recent commits.
+Sync project memory with recent commits. Ensures CLAUDE.md never has outdated references.
 
 ### `organize`
 Organize existing CLAUDE.md into project-memory structure. Migrates architecture, conventions, commands, tasks, and specs from verbose CLAUDE.md to organized files.
+
+### `create-spec`
+Create detailed specification from user requirements. Clarifies ambiguity, validates against codebase, considers security and edge cases.
+
+### `refresh-prompts`
+Update project-specific prompts with latest template improvements while preserving customizations. Backs up existing prompts before changes.
 
 ## How It Works
 
