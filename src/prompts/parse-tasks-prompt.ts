@@ -38,6 +38,12 @@ If task structure is not found, assess project size/spec complexity to choose st
 4. Include: title, description, acceptance criteria, dependencies, priority, subtasks if needed
 5. Set specReference field to the spec file path
 
+**CRITICAL: If user references a spec file, MUST include specReference in every task**
+- specReference links tasks back to their source specification
+- Format: \`"specReference": "specs/feature-name.md"\`
+- This enables traceability between specs and implementation
+- NEVER create tasks from a spec without setting specReference
+
 ### Step 3: Check Existing Tasks & Codebase
 
 **CRITICAL: Avoid duplicates and already-implemented tasks**
